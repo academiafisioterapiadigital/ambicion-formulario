@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulario de entrada · Ambición · AFD</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--teal:#1fb5b0;--teal-d:#17918d;--teal-l:#e6f6f5;--ink:#0b0b0b;--txt:#2b2f33;--mut:#8a9099;--line:#e7e8ea;--bg:#fbfbfa;--pink:#d98ab4;
+--grad:linear-gradient(90deg,#d8b94b 0%,#9cc06c 28%,#3fbf9a 50%,#1fb5b0 66%,#5aa6b9 82%,#8d9bb5 100%)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);background-image:radial-gradient(circle at 50% 0,#fff 0,#fbfbfa 55%);color:var(--txt);min-height:100vh;padding:0 1rem 3rem}
+.container{max-width:780px;margin:0 auto}
+.topbar{max-width:780px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:18px 0;border-bottom:1px solid var(--line);margin-bottom:2rem}
+.topbar img{height:34px;width:auto;display:block}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 16px;font-size:11px;font-weight:800;letter-spacing:.28em;color:var(--mut);text-transform:uppercase}
+.eyebrow::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--pink)}
+.display{font-family:'Anton',Impact,sans-serif;font-weight:400;text-transform:uppercase;line-height:.98;letter-spacing:.005em;color:var(--ink)}
+.grad{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
+.login-wrap{min-height:78vh;display:flex;align-items:center;justify-content:center}
+.login-card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:2.5rem 2rem;width:100%;max-width:440px;text-align:center;box-shadow:0 20px 50px -30px rgba(0,0,0,.18)}
+.login-card .display{font-size:38px;margin:16px 0 4px}
+.login-card .display.grad{font-size:44px;margin:0 0 14px}
+.login-card p{font-size:15px;color:var(--mut);margin-bottom:1.5rem;line-height:1.6}
+.login-card input{width:100%;padding:14px 18px;font-size:15px;border:1px solid #dfe1e4;border-radius:999px;margin-bottom:12px;font-family:inherit;text-align:center}
+.login-card input:focus,textarea:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 4px rgba(31,181,176,.12)}
+.btn-login,.btn{font-family:inherit;font-weight:800;letter-spacing:.12em;text-transform:uppercase;font-size:12px;border-radius:999px;cursor:pointer;transition:all .15s}
+.btn-login{width:100%;padding:16px;background:var(--teal);color:#fff;border:none;box-shadow:0 10px 24px -12px rgba(31,181,176,.7)}
+.btn-login:hover{background:var(--teal-d)}.btn-login:disabled{background:#9adad7;cursor:not-allowed;box-shadow:none}
+.login-msg{margin-top:12px;font-size:13px;border-radius:12px;padding:10px 12px;display:none;line-height:1.5}
+.login-msg.err{color:#b23b3b;background:#fdf0ef}.login-msg.ok{color:var(--teal-d);background:var(--teal-l)}
+.hero{text-align:center;margin-bottom:1.75rem}
+.hero .display{font-size:clamp(40px,7vw,64px);margin-top:18px}
+.hero .display.grad{margin-top:0}
+.hero p{font-size:16px;color:var(--mut);max-width:560px;margin:14px auto 0;line-height:1.6}
+.header-user{display:flex;align-items:center;gap:10px}
+.user-badge{font-size:12px;color:var(--teal-d);background:var(--teal-l);padding:7px 14px;border-radius:999px;font-weight:600}
+.btn-salir{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ink);background:none;border:none;cursor:pointer;font-family:inherit}
+.panel{position:sticky;top:0;z-index:10;background:rgba(251,251,250,.94);backdrop-filter:blur(6px);padding:12px 0 4px;margin-bottom:.5rem}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:6px;font-weight:500}
+.progress-label #prog-pct{font-weight:800;color:var(--teal-d)}
+.progress-bar{height:6px;background:#eceef0;border-radius:10px;overflow:hidden}
+.progress-fill{height:100%;background:var(--grad);border-radius:10px;transition:width .4s ease}
+.sec-nav{display:flex;gap:6px;overflow-x:auto;padding:12px 0 8px;scrollbar-width:thin}
+.sec-chip{flex-shrink:0;font-size:12px;font-weight:600;color:var(--mut);background:#fff;border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;white-space:nowrap;font-family:inherit}
+.sec-chip.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.sec-chip.done{background:var(--teal-l);border-color:#bfe8e6;color:var(--teal-d)}
+.sec-chip.done::before{content:'✓ '}
+.autosave-bar{font-size:12px;color:#a3a8ae;min-height:18px;padding-bottom:4px}
+.autosave-bar.guardando{color:var(--teal)}.autosave-bar.error{color:#b23b3b}
+.intro-box{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin:1rem 0 1.5rem;font-size:14px;color:#5b6168;line-height:1.7}
+.intro-box strong{color:var(--ink);font-weight:800;letter-spacing:.14em;text-transform:uppercase;font-size:11px}
+.intro-box ul{margin:8px 0 0 18px}
+.sec-head{margin:1.25rem 0 1rem}
+.sec-head .eyebrow{margin-bottom:12px}
+.sec-head h2{font-size:clamp(30px,5vw,40px)}
+.sec-count{font-size:14px;color:var(--mut);margin-top:6px}
+.q{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:12px;transition:border-color .2s,box-shadow .2s}
+.q.ok{border-color:#bfe8e6;box-shadow:inset 3px 0 0 var(--teal)}
+.q-head{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.q-num{font-size:11px;font-weight:800;color:var(--teal-d);background:var(--teal-l);border-radius:999px;padding:3px 9px;flex-shrink:0;margin-top:1px}
+.q-text{font-size:15px;font-weight:600;color:var(--ink);line-height:1.45}
+.q-tag{display:block;font-size:12px;color:#86701f;background:#fbf6e4;border:1px solid #efe2b0;border-radius:12px;padding:7px 11px;margin-bottom:10px;line-height:1.45}
+.q-tag.ok{color:var(--teal-d);background:var(--teal-l);border-color:#bfe8e6}
+textarea{width:100%;font-size:14px;color:var(--txt);background:#fff;border:1px solid #dfe1e4;border-radius:12px;padding:12px 14px;font-family:inherit;resize:vertical;line-height:1.6;min-height:72px}
+.q-ok{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px;color:#5b6168;cursor:pointer;user-select:none}
+.q-ok input{accent-color:var(--teal);width:17px;height:17px;cursor:pointer}
+.scale{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.scale button{width:42px;height:42px;border-radius:50%;border:1px solid #dfe1e4;background:#fff;font-size:14px;font-weight:700;color:#5b6168;cursor:pointer;font-family:inherit}
+.scale button:hover{border-color:var(--teal)}
+.scale button.sel{background:var(--teal);border-color:var(--teal);color:#fff}
+.scale-ends{display:flex;justify-content:space-between;font-size:11px;color:#a3a8ae;margin-top:6px;max-width:480px}
+.nav-row{display:flex;justify-content:space-between;align-items:center;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--line);gap:10px;flex-wrap:wrap}
+.btn{padding:14px 24px;border:1px solid #dfe1e4;background:#fff;color:var(--ink)}
+.btn:hover{border-color:var(--ink)}.btn:disabled{opacity:.35;cursor:default}
+.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff;box-shadow:0 10px 24px -12px rgba(31,181,176,.7)}.btn.primary:hover{background:var(--teal-d)}
+.btn.dark{background:var(--ink);border-color:var(--ink);color:#fff}
+.final-box{background:#fff;border:1px solid #bfe8e6;border-radius:18px;padding:22px;margin-top:1.25rem;font-size:15px;color:var(--txt);line-height:1.6;text-align:center}
+.demo-banner{background:#fbf6e4;border:1px solid #efe2b0;color:#86701f;font-size:13px;border-radius:999px;padding:9px 16px;margin-bottom:1rem;text-align:center}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(90px);background:var(--ink);color:#fff;padding:12px 22px;border-radius:999px;font-size:14px;transition:transform .3s;z-index:1000}
+.toast.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:560px){.scale button{width:36px;height:36px;font-size:13px}.btn{padding:12px 16px}}
+</style>
+</head>
+<body>
+<div id="login-screen" class="login-wrap" style="display:none">
+  <div class="login-card">
+    <div style="display:flex;justify-content:center;margin-bottom:1.25rem"><img src="logo-afd.png" alt="Academia de Fisioterapia Digital" style="height:54px;width:auto"></div>
+    <span class="eyebrow">Mastermind Ambición</span>
+    <div class="display">Tu punto</div><div class="display grad">de partida</div>
+    <p>Escribe tu correo y te enviaremos un enlace para entrar. Tus respuestas se guardan solas y solo las vemos tú y Cris.</p>
+    <input type="email" id="login-email" placeholder="tucorreo@email.com" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="btn-login" id="btn-login" onclick="doLogin()">Enviarme el enlace</button>
+    <div class="login-msg" id="login-msg"></div>
+  </div>
+</div>
+
+<div id="app-screen" style="display:none">
+<div class="container">
+  <div class="topbar"><img src="logo-afd.png" alt="AFD"><div class="header-user"><span class="user-badge" id="user-name">—</span><button class="btn-salir" onclick="doLogout()">Salir</button></div></div>
+  <div id="demo-banner"></div>
+  <div class="hero">
+    <span class="eyebrow">Mastermind Ambición · Formulario de entrada</span>
+    <div class="display">Tu punto</div><div class="display grad">de partida</div>
+    <p>Ya hemos rellenado lo que sabemos de ti. Revísalo, corrige lo que no encaje y completa lo que falta.</p>
+  </div>
+  <div class="panel">
+  <div class="progress-wrap">
+    <div class="progress-label"><span id="prog-txt">0 de 0 preguntas</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="sec-nav" id="sec-nav"></div>
+  <div class="autosave-bar" id="autosave"></div>
+  </div>
+  <div id="sec-body"></div>
+  <div class="nav-row">
+    <button class="btn" id="btn-prev" onclick="go(cur-1)">← Anterior</button>
+    <span class="sec-count" id="sec-pos" style="margin:0"></span>
+    <button class="btn primary" id="btn-next" onclick="go(cur+1)">Siguiente sección →</button>
+  </div>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* === Configuración === */
+const SUPABASE_URL='https://xmtmezkoebowgsbxeenv.supabase.co';
+const SUPABASE_KEY='sb_publishable_rrBIvhm28Cgpb13g9daXZQ_yoc8HOHc';
+const TABLA='ejercicio_formulario_entrada';
+/* Preguntas (genéricas, sin datos de ninguna alumna) */
+const FORM={"intro": ["Lo que ya sabemos sale de tus documentos (oferta, avatares, análisis de llamadas, análisis de Instagram) y de tu conversación con Cris. Lo verás marcado con 📝.", "Tu trabajo es revisarlo, corregir lo que no esté bien y ampliar lo que se quede corto. Lo marcado con ⏳ está pendiente y solo lo puedes responder tú.", "Si no sabes una cifra exacta, pon \"aprox.\" o \"no lo sé\": un dato aproximado nos sirve más que un hueco.", "Si te resulta más cómodo, puedes responder por audio.", "Las preguntas de publicidad (sección 14) y de lanzamientos (sección 15) solo si aplican a tu caso."], "secciones": [{"id": "1", "titulo": "Huella inicial de éxito", "preguntas": [{"id": "1.1", "texto": "Facturación mensual media de los últimos 3 meses (€):", "tipo": "texto"}, {"id": "1.2", "texto": "Facturación mensual media de los últimos 6 meses (€):", "tipo": "texto"}, {"id": "1.3", "texto": "Facturación del mejor mes del último año (€):", "tipo": "texto"}, {"id": "1.4", "texto": "Facturación del peor mes del último año (€):", "tipo": "texto"}, {"id": "1.5", "texto": "Beneficio neto mensual medio (€):", "tipo": "texto"}, {"id": "1.6", "texto": "Estás en pérdidas, equilibrio o beneficio hoy:", "tipo": "texto"}, {"id": "1.7", "texto": "Ventas de tu producto principal (high ticket): último mes y media mensual del último año", "tipo": "texto"}, {"id": "1.8", "texto": "Miembros activos de tu membresía o comunidad hoy", "tipo": "texto"}, {"id": "1.9", "texto": "Altas y bajas de tu membresía en el último mes (y media mensual si la sabes)", "tipo": "texto"}, {"id": "1.10", "texto": "Llamadas de venta al mes y cuántas cierras", "tipo": "texto"}, {"id": "1.11", "texto": "Personas que te piden información al mes (mensajes, palabras clave, formulario de Tally)", "tipo": "texto"}, {"id": "1.12", "texto": "Seguidoras de Instagram hoy", "tipo": "texto"}, {"id": "1.13", "texto": "Horas a la semana que dedicas al negocio, y cuántas de ellas a atender clientas", "tipo": "texto"}, {"id": "1.14", "texto": "Del 1 al 10: tranquilidad con tus ingresos", "tipo": "escala"}, {"id": "1.15", "texto": "Del 1 al 10: confianza cuando vendes", "tipo": "escala"}, {"id": "1.16", "texto": "Del 1 al 10: claridad sobre qué hacer cada semana", "tipo": "escala"}, {"id": "1.17", "texto": "Del 1 al 10: control de tus números (sabes cuánto vendes, de dónde viene y cuánto te queda)", "tipo": "escala"}, {"id": "1.18", "texto": "Del 1 al 10: angustia cuando pasa una semana sin ventas", "tipo": "escala"}, {"id": "1.19", "texto": "Describe en una frase cómo está hoy tu negocio", "tipo": "texto"}]}, {"id": "2", "titulo": "Datos personales", "preguntas": [{"id": "2.1", "texto": "Edad:", "tipo": "texto"}, {"id": "2.2", "texto": "País:", "tipo": "texto"}, {"id": "2.3", "texto": "Provincia:", "tipo": "texto"}, {"id": "2.4", "texto": "Ciudad:", "tipo": "texto"}, {"id": "2.5", "texto": "Género:", "tipo": "texto"}, {"id": "2.6", "texto": "Situación familiar:", "tipo": "texto"}, {"id": "2.7", "texto": "Situación profesional:", "tipo": "texto"}, {"id": "2.8", "texto": "Nivel de ingresos aproximado (anual):", "tipo": "texto"}]}, {"id": "3", "titulo": "Tú y tu historia", "preguntas": [{"id": "3.1", "texto": "Breve biografía profesional:", "tipo": "texto"}, {"id": "3.2", "texto": "Tu mayor logro profesional hasta hoy:", "tipo": "texto"}, {"id": "3.3", "texto": "Tu mayor fracaso o cagada hasta hoy:", "tipo": "texto"}, {"id": "3.4", "texto": "Por qué te metes en Ambición específicamente:", "tipo": "texto"}, {"id": "3.5", "texto": "Autoridad declarada externa:", "tipo": "texto"}, {"id": "3.6", "texto": "Apariciones en medios / podcasts / colaboraciones relevantes:", "tipo": "texto"}, {"id": "3.7", "texto": "Historia origen que ya cuentas o podrías contar en ventas:", "tipo": "texto"}, {"id": "3.8", "texto": "Cicatrices personales que conectan con tu avatar:", "tipo": "texto"}, {"id": "3.9", "texto": "Hitos previos relevantes:", "tipo": "texto"}]}, {"id": "4", "titulo": "Tu proyecto hoy", "preguntas": [{"id": "4.1", "texto": "Nombre del proyecto:", "tipo": "texto"}, {"id": "4.2", "texto": "Sector amplio:", "tipo": "texto"}, {"id": "4.3", "texto": "Sub-nicho específico:", "tipo": "texto"}, {"id": "4.4", "texto": "Punto de partida resumido en una línea:", "tipo": "texto"}, {"id": "4.5", "texto": "¿Qué está funcionando bien en tu proyecto ahora mismo?", "tipo": "texto"}, {"id": "4.6", "texto": "¿Qué NO está funcionando como esperabas?", "tipo": "texto"}, {"id": "4.7", "texto": "¿Cuál es tu mayor freno ahora mismo?", "tipo": "texto"}, {"id": "4.8", "texto": "Cuéntalo con tus palabras:", "tipo": "texto"}, {"id": "4.9", "texto": "¿Tienes personas o equipo trabajando en tu proyecto? ¿Cuántas personas están implicadas?", "tipo": "texto"}, {"id": "4.10", "texto": "Quién toma decisiones finales en el proyecto:", "tipo": "texto"}, {"id": "4.11", "texto": "Próximo pivote previsto, si lo hay:", "tipo": "texto"}, {"id": "4.12", "texto": "¿Estás lanzando algo ahora mismo o tenías pensado lanzar algo en los próximos 2 o 3 meses? Si tienes una idea, descríbela.", "tipo": "texto"}, {"id": "4.13", "texto": "¿Algún evento te obligará a parar en algún momento? Si es así, cuándo y por cuánto tiempo:", "tipo": "texto"}]}, {"id": "5", "titulo": "Gestión, fiscalidad y datos de salud", "preguntas": [{"id": "5.1", "texto": "Forma jurídica:", "tipo": "texto"}, {"id": "5.2", "texto": "País fiscal:", "tipo": "texto"}, {"id": "5.3", "texto": "Tienes asesoría fiscal: ¿Cuál?", "tipo": "texto"}, {"id": "5.4", "texto": "IVA / IGIC / impuesto sobre venta aplicable:", "tipo": "texto"}, {"id": "5.5", "texto": "Retenciones aplicables a tus ventas:", "tipo": "texto"}, {"id": "5.6", "texto": "Eventos financieros pendientes:", "tipo": "texto"}, {"id": "5.7", "texto": "Estás vendiendo en mercados con regulación específica que conozcas (sanitaria, publicidad de salud…):", "tipo": "texto"}, {"id": "5.8", "texto": "Qué datos de salud recoges de tus clientas (formularios, analíticas, chats) y dónde los guardas", "tipo": "texto"}, {"id": "5.9", "texto": "¿Tienes política de privacidad, consentimiento informado y aviso legal? ¿Quién los redactó?", "tipo": "texto"}, {"id": "5.10", "texto": "¿Grabas tus llamadas de venta o de seguimiento? ¿Con consentimiento?", "tipo": "texto"}]}, {"id": "6", "titulo": "Mercado", "preguntas": [{"id": "6.1", "texto": "Mercado geográfico principal:", "tipo": "texto"}, {"id": "6.2", "texto": "Mercados secundarios donde ya vendes:", "tipo": "texto"}, {"id": "6.3", "texto": "% de distribución estimada de leads por país:", "tipo": "texto"}, {"id": "6.4", "texto": "Idiomas en los que operas:", "tipo": "texto"}, {"id": "6.5", "texto": "¿Tienes un plan internacional?", "tipo": "texto"}, {"id": "6.6", "texto": "Estacionalidad del sector:", "tipo": "texto"}]}, {"id": "7", "titulo": "Tu clienta (avatar)", "preguntas": [{"id": "7.1", "texto": "Cómo se llama internamente tu avatar:", "tipo": "texto"}, {"id": "7.2", "texto": "¿Cómo se encuentra tu avatar hoy?", "tipo": "texto"}, {"id": "7.3", "texto": "Dónde está tu avatar ahora mismo en su vida:", "tipo": "texto"}, {"id": "7.4", "texto": "Qué PIENSA y SIENTE tu avatar en su día a día:", "tipo": "texto"}, {"id": "7.5", "texto": "Qué OYE:", "tipo": "texto"}, {"id": "7.6", "texto": "Qué VE en su entorno:", "tipo": "texto"}, {"id": "7.7", "texto": "Qué DICE y HACE en público:", "tipo": "texto"}, {"id": "7.8", "texto": "Qué hace en privado que no diría jamás en público:", "tipo": "texto"}, {"id": "7.9", "texto": "Top 3 dolores funcionales:", "tipo": "texto"}, {"id": "7.10", "texto": "Top 3 dolores emocionales:", "tipo": "texto"}, {"id": "7.11", "texto": "Top 3 dolores de identidad:", "tipo": "texto"}, {"id": "7.12", "texto": "¿Cuál es el dolor real más profundo que no ha articulado todavía?", "tipo": "texto"}, {"id": "7.13", "texto": "La frase exacta que diría tu avatar describiendo su dolor:", "tipo": "texto"}, {"id": "7.14", "texto": "Top 3 deseos funcionales:", "tipo": "texto"}, {"id": "7.15", "texto": "Top 3 deseos emocionales:", "tipo": "texto"}, {"id": "7.16", "texto": "Top 3 deseos de identidad:", "tipo": "texto"}, {"id": "7.17", "texto": "Deseo identitario subyacente:", "tipo": "texto"}, {"id": "7.18", "texto": "¿Qué desea lograr o hasta dónde quiere llegar?", "tipo": "texto"}, {"id": "7.19", "texto": "La frase exacta que diría tu avatar describiendo su deseo:", "tipo": "texto"}, {"id": "7.20", "texto": "¿Cuáles son sus miedos principales?", "tipo": "texto"}, {"id": "7.21", "texto": "Bloqueo identitario principal:", "tipo": "texto"}, {"id": "7.22", "texto": "Ganancia secundaria de la identidad actual:", "tipo": "texto"}, {"id": "7.23", "texto": "Objeciones racionales que va a poner para no comprar:", "tipo": "texto"}, {"id": "7.24", "texto": "Objeciones emocionales:", "tipo": "texto"}, {"id": "7.25", "texto": "Objeciones de identidad:", "tipo": "texto"}, {"id": "7.26", "texto": "Auto Exclusiones típicas:", "tipo": "texto"}, {"id": "7.27", "texto": "Qué le validará socialmente comprar tu producto:", "tipo": "texto"}, {"id": "7.28", "texto": "Qué le avergonzaría socialmente comprar tu producto:", "tipo": "texto"}]}, {"id": "8", "titulo": "Tus productos", "preguntas": [{"id": "8.1", "texto": "Nombre del producto principal:", "tipo": "texto"}, {"id": "8.2", "texto": "Promesa en una línea:", "tipo": "texto"}, {"id": "8.3", "texto": "Tu propuesta de valor única en una frase:", "tipo": "texto"}, {"id": "8.4", "texto": "Para quién es:", "tipo": "texto"}, {"id": "8.5", "texto": "Para quién NO es:", "tipo": "texto"}, {"id": "8.6", "texto": "Mecanismo único:", "tipo": "texto"}, {"id": "8.7", "texto": "Cómo transforma al cliente (antes → después):", "tipo": "texto"}, {"id": "8.8", "texto": "Identidad final que se le promete:", "tipo": "texto"}, {"id": "8.9", "texto": "Identidad puente que se le ofrece:", "tipo": "texto"}, {"id": "8.10", "texto": "Componentes del producto desglosados:", "tipo": "texto"}, {"id": "8.11", "texto": "Formato de entrega del producto principal:", "tipo": "texto"}, {"id": "8.12", "texto": "Duración del acceso:", "tipo": "texto"}, {"id": "8.13", "texto": "Sesiones en vivo incluidas: ¿cuántas y con qué frecuencia?", "tipo": "texto"}, {"id": "8.14", "texto": "Soporte 1-1 incluido: ¿por qué canal?", "tipo": "texto"}, {"id": "8.15", "texto": "Comunidad asociada: ¿en qué plataforma?", "tipo": "texto"}, {"id": "8.16", "texto": "Bonus declarados:", "tipo": "texto"}, {"id": "8.17", "texto": "Garantía:", "tipo": "texto"}, {"id": "8.18", "texto": "Política de devolución/reembolso:", "tipo": "texto"}, {"id": "8.19", "texto": "Devoluciones / reembolsos típicos (%):", "tipo": "texto"}, {"id": "8.20", "texto": "% de tasa de impago:", "tipo": "texto"}, {"id": "8.21", "texto": "¿Ofreces financiación en alguno de tus productos?", "tipo": "texto"}, {"id": "8.22", "texto": "Posicionamiento de precio vs mercado:", "tipo": "texto"}, {"id": "8.23", "texto": "Ticket medio histórico (€):", "tipo": "texto"}, {"id": "8.24", "texto": "LTV estimado del cliente (€):", "tipo": "texto"}, {"id": "8.25", "texto": "¿Qué parte del producto está ya construida, qué queda pendiente y qué se construirá durante la entrega? (%)", "tipo": "texto"}, {"id": "8.26", "texto": "¿Tienes algún producto recurrente (membresía, suscripción)?", "tipo": "texto"}, {"id": "8.27", "texto": "Variantes de producto (nombre, tipo, precio, qué es):", "tipo": "texto"}, {"id": "8.28", "texto": "Tu membresía: cómo se compra hoy (enlace directo, tras llamada, solo incluida en otro producto) y por qué se van quienes se dan de baja", "tipo": "texto"}, {"id": "8.29", "texto": "Qué pasa cuando una clienta termina tu producto principal (¿se queda en la membresía? ¿paga?)", "tipo": "texto"}, {"id": "8.30", "texto": "Cómo se distribuían las ventas entre variantes históricamente:", "tipo": "texto"}]}, {"id": "9", "titulo": "Diferenciación y competencia", "preguntas": [{"id": "9.1", "texto": "Diferencial técnico:", "tipo": "texto"}, {"id": "9.2", "texto": "Diferencial identitario:", "tipo": "texto"}, {"id": "9.3", "texto": "Diferencial de experiencia:", "tipo": "texto"}, {"id": "9.4", "texto": "Qué haces tú que NO hacen ellos:", "tipo": "texto"}, {"id": "9.5", "texto": "Qué hacen ellos que NO haces tú:", "tipo": "texto"}, {"id": "9.6", "texto": "Qué hace que un cliente te elija a ti y no a otro:", "tipo": "texto"}, {"id": "9.7", "texto": "Top 3 competidores directos en tu sub-nicho (nombre, qué hace, fortalezas, debilidades):", "tipo": "texto"}, {"id": "9.8", "texto": "Riesgo: si mañana apareciera un competidor con el doble de presupuesto, ¿qué te seguiría manteniendo en pie?", "tipo": "texto"}]}, {"id": "10", "titulo": "Resultados y experiencia de tus clientas", "preguntas": [{"id": "10.1", "texto": "Casos de éxito propios documentados (nombre o inicial, resultado):", "tipo": "texto"}, {"id": "10.2", "texto": "Casos de éxito documentados con cifras concretas (cuántos):", "tipo": "texto"}, {"id": "10.3", "texto": "Cuéntanos los 3 mejores resultados que ha conseguido una clienta gracias a tu producto (antes, después, cifra clave):", "tipo": "texto"}, {"id": "10.4", "texto": "Testimonios reseñables disponibles:", "tipo": "texto"}, {"id": "10.5", "texto": "¿Mides la satisfacción de tus clientas? ¿Cómo y con qué resultado?", "tipo": "texto"}, {"id": "10.6", "texto": "% de clientas que usa el producto activamente (¿lo mides?):", "tipo": "texto"}, {"id": "10.7", "texto": "% de clientas que completa el onboarding en la primera semana (¿lo mides?):", "tipo": "texto"}, {"id": "10.8", "texto": "¿Qué pasa en las primeras 48-72 horas después de que alguien compra?", "tipo": "texto"}, {"id": "10.9", "texto": "Experiencia post-compra documentada:", "tipo": "texto"}, {"id": "10.10", "texto": "Automatizaciones de onboarding configuradas (¿cuáles?):", "tipo": "texto"}, {"id": "10.11", "texto": "Quejas o problemas que te repiten más las clientas que ya están dentro:", "tipo": "texto"}]}, {"id": "11", "titulo": "Comunicación y ángulo", "preguntas": [{"id": "11.1", "texto": "Ángulo o gancho principal de comunicación:", "tipo": "texto"}, {"id": "11.2", "texto": "Por qué este ángulo y no otro:", "tipo": "texto"}, {"id": "11.3", "texto": "Prueba que sostiene el ángulo:", "tipo": "texto"}, {"id": "11.4", "texto": "Autoridad que sostiene el ángulo:", "tipo": "texto"}, {"id": "11.5", "texto": "Story principal alrededor del ángulo:", "tipo": "texto"}, {"id": "11.6", "texto": "Metáforas dominantes que usas:", "tipo": "texto"}, {"id": "11.7", "texto": "Frases-bisagra ya encontradas:", "tipo": "texto"}, {"id": "11.8", "texto": "Ángulos o ganchos secundarios que mantienes en reserva:", "tipo": "texto"}, {"id": "11.9", "texto": "Ángulos o ganchos descartados:", "tipo": "texto"}, {"id": "11.10", "texto": "La objeción que MÁS te aparece en ventas:", "tipo": "texto"}, {"id": "11.11", "texto": "Cómo la respondes hoy:", "tipo": "texto"}, {"id": "11.12", "texto": "Pre-respuesta articulada a cada objeción:", "tipo": "texto"}]}, {"id": "12", "titulo": "Redes sociales y web", "preguntas": [{"id": "12.1", "texto": "¿Qué RRSS usas?", "tipo": "texto"}, {"id": "12.2", "texto": "Instagram — URL, seguidores, engagement medio (%) y frecuencia de publicación:", "tipo": "texto"}, {"id": "12.3", "texto": "YouTube — URL, suscriptores, vistas medias por vídeo y frecuencia de publicación:", "tipo": "texto"}, {"id": "12.4", "texto": "TikTok — URL, seguidores, engagement medio (%) y frecuencia de publicación:", "tipo": "texto"}, {"id": "12.5", "texto": "LinkedIn — URL, seguidores, engagement medio (%) y frecuencia de publicación:", "tipo": "texto"}, {"id": "12.6", "texto": "Utilizas orgánico: ¿en qué canales?", "tipo": "texto"}, {"id": "12.7", "texto": "Asociaciones o partnerships activos:", "tipo": "texto"}, {"id": "12.8", "texto": "URL web principal:", "tipo": "texto"}, {"id": "12.9", "texto": "Visitas mensuales actuales:", "tipo": "texto"}, {"id": "12.10", "texto": "Páginas principales de la web por tráfico:", "tipo": "texto"}, {"id": "12.11", "texto": "Hay blog activo:", "tipo": "texto"}, {"id": "12.12", "texto": "Estado SEO básico:", "tipo": "texto"}]}, {"id": "13", "titulo": "Email y captación de leads", "preguntas": [{"id": "13.1", "texto": "¿Usas listas de email? ¿Con qué plataforma?", "tipo": "texto"}, {"id": "13.2", "texto": "Número total de contactos en lista:", "tipo": "texto"}, {"id": "13.3", "texto": "% de crecimiento mensual de la lista de email:", "tipo": "texto"}, {"id": "13.4", "texto": "% de la lista que es comprador previo:", "tipo": "texto"}, {"id": "13.5", "texto": "Tasa de apertura media:", "tipo": "texto"}, {"id": "13.6", "texto": "Tasa de clics media:", "tipo": "texto"}, {"id": "13.7", "texto": "Estructura de tu secuencia de emails típica y número de emails que sueles meter:", "tipo": "texto"}, {"id": "13.8", "texto": "Lead magnets que has usado:", "tipo": "texto"}, {"id": "13.9", "texto": "URL de páginas de captación (lead magnet):", "tipo": "texto"}, {"id": "13.10", "texto": "Leads únicos:", "tipo": "texto"}, {"id": "13.11", "texto": "Leads totales capturados en lanzamientos previos:", "tipo": "texto"}]}, {"id": "14", "titulo": "Publicidad (solo si la has usado)", "preguntas": [{"id": "14.1", "texto": "Utilizas Paid Media: ¿en qué plataformas?", "tipo": "texto"}, {"id": "14.2", "texto": "Inversión Meta Ads histórica (€):", "tipo": "texto"}, {"id": "14.3", "texto": "Inversión Google Ads histórica (€):", "tipo": "texto"}, {"id": "14.4", "texto": "Inversión total acumulada en publicidad (€):", "tipo": "texto"}, {"id": "14.5", "texto": "CAC histórico (€):", "tipo": "texto"}, {"id": "14.6", "texto": "CPL medio histórico Meta (€):", "tipo": "texto"}, {"id": "14.7", "texto": "CPC medio histórico Meta (€):", "tipo": "texto"}, {"id": "14.8", "texto": "CTR medio histórico Meta (%):", "tipo": "texto"}, {"id": "14.9", "texto": "Si usaste Google Ads: CPL y CTR medios", "tipo": "texto"}, {"id": "14.10", "texto": "ROAS medio histórico:", "tipo": "texto"}, {"id": "14.11", "texto": "ROI medio histórico del proyecto:", "tipo": "texto"}, {"id": "14.12", "texto": "% tráfico orgánico vs pago histórico:", "tipo": "texto"}, {"id": "14.13", "texto": "Anuncios top performance histórico:", "tipo": "texto"}, {"id": "14.14", "texto": "Ángulos de anuncios que ya has testado:", "tipo": "texto"}, {"id": "14.15", "texto": "Formatos de anuncio que ya has usado:", "tipo": "texto"}]}, {"id": "15", "titulo": "Embudo, venta y lanzamientos", "preguntas": [{"id": "15.1", "texto": "Describe tu funnel paso a paso, desde el primer contenido o anuncio hasta la venta:", "tipo": "texto"}, {"id": "15.2", "texto": "Duración total del funnel (días):", "tipo": "texto"}, {"id": "15.3", "texto": "Tipos de funnel que ya has usado:", "tipo": "texto"}, {"id": "15.4", "texto": "Has usado filtro previo a venta: ¿de qué tipo?", "tipo": "texto"}, {"id": "15.5", "texto": "¿Cómo compra hoy una clienta cada producto? (llamada, enlace directo, apertura y cierre…)", "tipo": "texto"}, {"id": "15.6", "texto": "¿Qué estrategias o acciones has probado antes para vender? (apertura, cierre, bonus…)", "tipo": "texto"}, {"id": "15.7", "texto": "Intentos previos que NO funcionaron:", "tipo": "texto"}, {"id": "15.8", "texto": "Lo que SÍ funcionó y vas a mantener:", "tipo": "texto"}, {"id": "15.9", "texto": "Drop-off principal en lanzamientos previos (o dónde se te pierden las clientas):", "tipo": "texto"}, {"id": "15.10", "texto": "Distribución de ventas por día/hora y patrones detectados:", "tipo": "texto"}, {"id": "15.11", "texto": "¿Has lanzado antes? ¿Cuántas veces? Fecha del primero y del último", "tipo": "texto"}, {"id": "15.12", "texto": "Lanzamientos previos — lista breve (nombre, tipo de funnel, facturación bruta):", "tipo": "texto"}, {"id": "15.13", "texto": "Pico de ventas mejor lanzamiento — fecha y unidades:", "tipo": "texto"}, {"id": "15.14", "texto": "% Visitante → Lead histórico:", "tipo": "texto"}, {"id": "15.15", "texto": "% Lead → Llamada agendada histórico:", "tipo": "texto"}, {"id": "15.16", "texto": "% Llamada → Venta histórico:", "tipo": "texto"}, {"id": "15.17", "texto": "% Lead → Venta directa histórico:", "tipo": "texto"}, {"id": "15.18", "texto": "% Global Lead → Venta histórico:", "tipo": "texto"}, {"id": "15.19", "texto": "Si hiciste directos o clases: % de registro, % de asistencia, retención y duración", "tipo": "texto"}, {"id": "15.20", "texto": "Piezas de contenido usadas en lanzamientos (vídeos o clases, audios de WhatsApp, emails):", "tipo": "texto"}, {"id": "15.21", "texto": "¿Has recopilado métricas de venta, de conversión del funnel, de captación en publicidad y de post-venta?", "tipo": "texto"}]}, {"id": "16", "titulo": "Enlaces", "preguntas": [{"id": "16.1", "texto": "URL Sales Page / VSL actual:", "tipo": "texto"}, {"id": "16.2", "texto": "URL de Sales Page / VSL previa:", "tipo": "texto"}, {"id": "16.3", "texto": "URLs de landings previas:", "tipo": "texto"}, {"id": "16.4", "texto": "URL de otras landings activas:", "tipo": "texto"}, {"id": "16.5", "texto": "URL de páginas de gracias:", "tipo": "texto"}, {"id": "16.6", "texto": "URL de páginas de checkout:", "tipo": "texto"}, {"id": "16.7", "texto": "URL del Drive con vídeos de clase de lanzamientos previos:", "tipo": "texto"}, {"id": "16.8", "texto": "URL de audios de WhatsApp / email usados en lanzamientos previos:", "tipo": "texto"}]}, {"id": "17", "titulo": "Herramientas", "preguntas": [{"id": "17.1", "texto": "Plataforma de venta:", "tipo": "texto"}, {"id": "17.2", "texto": "Plataforma de membresía/formación:", "tipo": "texto"}, {"id": "17.3", "texto": "Sistema de calendario:", "tipo": "texto"}, {"id": "17.4", "texto": "Sistema de videollamadas:", "tipo": "texto"}, {"id": "17.5", "texto": "Sistema de soporte/tickets:", "tipo": "texto"}, {"id": "17.6", "texto": "Herramientas de automatización:", "tipo": "texto"}, {"id": "17.7", "texto": "Herramientas de analítica:", "tipo": "texto"}, {"id": "17.8", "texto": "Herramienta de páginas / landings:", "tipo": "texto"}, {"id": "17.9", "texto": "Herramientas de IA usadas:", "tipo": "texto"}, {"id": "17.10", "texto": "Otras herramientas relevantes del stack:", "tipo": "texto"}]}, {"id": "18", "titulo": "Números acumulados del negocio", "preguntas": [{"id": "18.1", "texto": "Ingresos brutos acumulados (€):", "tipo": "texto"}, {"id": "18.2", "texto": "Ingresos netos sin IVA acumulados (€):", "tipo": "texto"}, {"id": "18.3", "texto": "Ventas totales acumuladas (unidades):", "tipo": "texto"}, {"id": "18.4", "texto": "Gastos fijos mensuales del proyecto (€) (renta, equipo, publicidad, plataformas, asesoría, servicios):", "tipo": "texto"}, {"id": "18.5", "texto": "Deuda pendiente del proyecto (€):", "tipo": "texto"}, {"id": "18.6", "texto": "Tienes runway / colchón financiero:", "tipo": "texto"}]}, {"id": "19", "titulo": "Objetivos a 12 meses y capacidad", "preguntas": [{"id": "19.1", "texto": "Objetivo conservador (facturación mensual media al terminar Ambición):", "tipo": "texto"}, {"id": "19.2", "texto": "Objetivo realista:", "tipo": "texto"}, {"id": "19.3", "texto": "Objetivo optimista:", "tipo": "texto"}, {"id": "19.4", "texto": "Objetivo de unidades vendidas (producto principal al mes y miembros de tu membresía):", "tipo": "texto"}, {"id": "19.5", "texto": "Qué pasa si lo consigues:", "tipo": "texto"}, {"id": "19.6", "texto": "Qué pasa si no lo consigues:", "tipo": "texto"}, {"id": "19.7", "texto": "Plan B si a mitad de año no llegas al objetivo conservador:", "tipo": "texto"}, {"id": "19.8", "texto": "Cuánto puedes invertir en publicidad durante Ambición (€):", "tipo": "texto"}, {"id": "19.9", "texto": "Cuánto puedes invertir en herramientas/equipo durante Ambición (€):", "tipo": "texto"}, {"id": "19.10", "texto": "Tu límite mental antes de cortar inversión:", "tipo": "texto"}]}]};
+/* Solo en la vista previa local: datos de demostración */
+const DEMO=/*__DEMO__*/null;
+
+const db=DEMO?null:supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:'implicit'}});
+let fila=null, pre={}, resp={}, cur=0, saveTimer=null;
+const ALL=FORM.secciones.flatMap(s=>s.preguntas);
+
+function esc(s){return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600)}
+function show(id){document.getElementById('login-screen').style.display=id==='login'?'flex':'none';document.getElementById('app-screen').style.display=id==='app'?'block':'none'}
+function loginMsg(txt,ok){const m=document.getElementById('login-msg');m.textContent=txt;m.className='login-msg '+(ok?'ok':'err');m.style.display='block'}
+
+/* Respondida = tiene texto y, si venía prellenada, la alumna la ha revisado */
+function hecha(q){const r=resp[q.id];if(!r)return false;if(q.tipo==='escala')return !!r.v;return !!(r.v&&String(r.v).trim())&&(!pre[q.id]||r.ok)}
+function secHecha(s){return s.preguntas.every(hecha)}
+function pct(){return Math.round(100*ALL.filter(hecha).length/ALL.length)}
+
+function renderNav(){
+  document.getElementById('sec-nav').innerHTML=FORM.secciones.map((s,i)=>`<button class="sec-chip ${i===cur?'active':''} ${i!==cur&&secHecha(s)?'done':''}" onclick="go(${i})">${s.id}. ${esc(s.titulo)}</button>`).join('');
+  const n=ALL.filter(hecha).length,p=pct();
+  document.getElementById('prog-txt').textContent=`${n} de ${ALL.length} preguntas revisadas`;
+  document.getElementById('prog-pct').textContent=p+'%';
+  document.getElementById('prog-fill').style.width=p+'%';
+}
+
+function qHtml(q){
+  const r=resp[q.id]||{}, p=pre[q.id];
+  if(q.tipo==='escala'){
+    const v=r.v||'';
+    return `<div class="q ${hecha(q)?'ok':''}" id="q-${q.id}"><div class="q-head"><span class="q-num">${q.id}</span><span class="q-text">${esc(q.texto)}</span></div>
+    ${p?`<div class="q-tag">📝 ${esc(p.texto)}</div>`:''}
+    <div class="scale">${[1,2,3,4,5,6,7,8,9,10].map(n=>`<button class="${String(v)===String(n)?'sel':''}" onclick="setScale('${q.id}',${n})">${n}</button>`).join('')}</div>
+    <div class="scale-ends"><span>1 · nada</span><span>10 · totalmente</span></div></div>`;
+  }
+  const val=r.v!==undefined?r.v:(p?p.texto:'');
+  const rows=Math.min(14,Math.max(3,Math.ceil(String(val).length/80)+String(val).split('\n').length));
+  return `<div class="q ${hecha(q)?'ok':''}" id="q-${q.id}"><div class="q-head"><span class="q-num">${q.id}</span><span class="q-text">${esc(q.texto)}</span></div>
+  ${p?`<div class="q-tag ${r.ok?'ok':''}" id="tag-${q.id}">${r.ok?'✓ Revisado por ti':'📝 Rellenado a partir de: '+esc(p.fuente||'lo que ya sabemos')+'. Corrige o amplía lo que haga falta.'}</div>`:''}
+  <textarea rows="${rows}" placeholder="Tu respuesta…" oninput="setText('${q.id}',this.value)">${esc(val)}</textarea>
+  ${p?`<label class="q-ok"><input type="checkbox" ${r.ok?'checked':''} onchange="setOk('${q.id}',this.checked)"> Está bien así / ya lo he revisado</label>`:''}</div>`;
+}
+
+function render(){
+  const s=FORM.secciones[cur];
+  const intro=cur===0?`<div class="intro-box"><strong>Cómo rellenarlo</strong><ul>${FORM.intro.map(l=>`<li>${esc(l.replace(' Lo verás marcado con 📝.','').replace(' Lo marcado con ⏳ está pendiente y solo lo puedes responder tú.',''))}</li>`).join('')}<li>Todo se guarda solo mientras escribes. Puedes dejarlo a medias y volver otro día.</li></ul></div>`:'';
+  const nPre=s.preguntas.filter(q=>pre[q.id]).length;
+  const last=cur===FORM.secciones.length-1;
+  document.getElementById('sec-body').innerHTML=intro+
+   `<div class="sec-head"><span class="eyebrow">Sección ${s.id} de ${FORM.secciones.length}</span><h2 class="display">${esc(s.titulo)}</h2><div class="sec-count">${s.preguntas.length} preguntas · ${nPre} ya rellenadas para que las revises</div></div>`+
+   s.preguntas.map(qHtml).join('')+
+   (last?`<div class="final-box">${fila&&fila.completado?'✓ Formulario enviado a Cris. ¡Gracias!':`Cuando lo tengas revisado, envíaselo a Cris. Después ya no podrás editarlo.<br><br><button class="btn dark" onclick="enviar()">Enviar formulario a Cris</button>`}</div>`:'');
+  document.getElementById('btn-prev').disabled=cur===0;
+  document.getElementById('btn-next').disabled=last;
+  document.getElementById('sec-pos').textContent=`Sección ${cur+1} de ${FORM.secciones.length}`;
+  renderNav();
+  const a=document.querySelector('.sec-chip.active');if(a)a.scrollIntoView({block:'nearest',inline:'center'});
+}
+function go(i){if(i<0||i>=FORM.secciones.length)return;cur=i;render();document.getElementById('sec-body').scrollIntoView({behavior:'smooth',block:'start'})}
+
+function refreshQ(id){const q=ALL.find(x=>x.id===id);const el=document.getElementById('q-'+id);if(el)el.classList.toggle('ok',hecha(q));const t=document.getElementById('tag-'+id);if(t&&resp[id]){t.classList.toggle('ok',!!resp[id].ok);t.textContent=resp[id].ok?'✓ Revisado por ti':'📝 Rellenado a partir de: '+(pre[id].fuente||'lo que ya sabemos')+'. Corrige o amplía lo que haga falta.'}renderNav()}
+function setText(id,v){const p=pre[id];resp[id]=Object.assign({},resp[id],{v,ok:p?(v.trim()!==p.texto.trim()||!!(resp[id]&&resp[id].ok)):true});const cb=document.querySelector('#q-'+CSS.escape(id)+' .q-ok input');if(cb)cb.checked=!!resp[id].ok;refreshQ(id);queueSave()}
+function setOk(id,ok){const cur=resp[id]||{v:pre[id]?pre[id].texto:''};resp[id]=Object.assign({},cur,{ok});refreshQ(id);queueSave()}
+function setScale(id,n){resp[id]={v:n,ok:true};render();queueSave()}
+
+function setSave(st,txt){const a=document.getElementById('autosave');a.className='autosave-bar '+st;a.textContent=txt}
+function queueSave(){if(fila&&fila.completado)return;setSave('guardando','Guardando…');clearTimeout(saveTimer);saveTimer=setTimeout(save,900)}
+async function save(){
+  if(DEMO){setSave('','✓ Guardado (vista previa: no se guarda de verdad)');return}
+  const {error}=await db.from(TABLA).update({respuestas:resp,porcentaje_completado:pct()}).eq('id',fila.id);
+  if(error){setSave('error','No se ha podido guardar. Revisa tu conexión; lo reintentamos al seguir escribiendo.');return}
+  setSave('','✓ Guardado '+new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit'}));
+}
+async function enviar(){
+  if(pct()<100&&!confirm(`Llevas un ${pct()}% revisado. ¿Quieres enviarlo igualmente?`))return;
+  if(!DEMO){const {error}=await db.from(TABLA).update({respuestas:resp,porcentaje_completado:pct(),completado:true,enviado_at:new Date().toISOString()}).eq('id',fila.id);if(error){toast('No se ha podido enviar. Inténtalo de nuevo.');return}}
+  fila.completado=true;render();toast('¡Enviado! Cris ya lo tiene.');
+}
+
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim().toLowerCase();if(!email)return;
+  const b=document.getElementById('btn-login');b.disabled=true;b.textContent='Comprobando…';
+  try{
+    const {data:okAlumna,error:e1}=await db.rpc('puede_entrar_formulario',{p_email:email});
+    if(e1)throw e1;
+    if(!okAlumna){loginMsg('Este correo no tiene un formulario asignado. Escribe a Cris para que lo revise.');return}
+    const {error}=await db.auth.signInWithOtp({email,options:{emailRedirectTo:location.origin+location.pathname}});
+    if(error)throw error;
+    loginMsg('Te hemos enviado un enlace a '+email+'. Ábrelo desde este mismo dispositivo para entrar. (Si no lo ves, mira en spam o promociones.)',true);
+  }catch(e){loginMsg('No hemos podido enviar el enlace. Espera un minuto y vuelve a intentarlo.')}
+  finally{b.disabled=false;b.textContent='Enviarme el enlace'}
+}
+async function doLogout(){if(!DEMO)await db.auth.signOut();location.reload()}
+
+async function cargar(user){
+  const {data,error}=await db.from(TABLA).select('*').maybeSingle();
+  if(error||!data){show('login');loginMsg('Has entrado, pero no encontramos tu formulario. Escribe a Cris.');return}
+  fila=data;pre=data.prellenado||{};resp=data.respuestas||{};
+  document.getElementById('user-name').textContent=user.email;
+  show('app');render();if(fila.completado)setSave('','Formulario enviado. Ya no se puede editar.');
+}
+
+(async function init(){
+  if(DEMO){
+    pre=DEMO.prellenado;fila={id:'demo',completado:false};
+    document.getElementById('demo-banner').innerHTML='<div class="demo-banner">Vista previa · así lo verá tu alumna al entrar. Nada de lo que escribas aquí se guarda.</div>';
+    document.getElementById('user-name').textContent=DEMO.email;show('app');render();return;
+  }
+  const {data:{session}}=await db.auth.getSession();
+  if(session)cargar(session.user);else show('login');
+  db.auth.onAuthStateChange((ev,s)=>{if(ev==='SIGNED_IN'&&s&&!fila)cargar(s.user)});
+})();
+</script>
+</body>
+</html>
